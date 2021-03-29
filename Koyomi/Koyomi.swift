@@ -130,8 +130,8 @@ public enum KoyomiStyle {
 public enum SelectionMode {
     case single(style: Style), multiple(style: Style), sequence(style: SequenceStyle), none
     
-    public enum SequenceStyle { case background, circle, line, semicircleEdge }
-    public enum Style { case background, circle, line }
+    public enum SequenceStyle { case background, circle, line, semicircleEdge, available }
+    public enum Style { case background, circle, line, available }
 }
 
 // MARK: - ContentPosition -
@@ -229,6 +229,11 @@ final public class Koyomi: UICollectionView {
             reloadData()
         }
     }
+    @IBInspectable public var availableViewDiameter: CGFloat = 0.75 {
+        didSet {
+            reloadData()
+        }
+    }
     
     public var inset: UIEdgeInsets = .zero {
         didSet {
@@ -291,6 +296,8 @@ final public class Koyomi: UICollectionView {
     
     fileprivate var dayLabelFont: UIFont?
     fileprivate var weekLabelFont: UIFont?
+    
+    public var availableDates: [Date] = [Date]()
     
     // MARK: - Initialization -
     required public init?(coder aDecoder: NSCoder) {
@@ -435,6 +442,11 @@ private extension Koyomi {
             
         } else {
             
+            if availableDates.contains(date) {
+                selectionMode = .single(style: .available)
+            
+            }
+            
             // Configure appearance properties for day cell
             isSelected = model.isSelect(with: indexPath)
             
@@ -478,12 +490,17 @@ private extension Koyomi {
                 }
                 
                 switch (selectionMode, isSelected) {
+                
+                //Not selected and available date to select.
+                case (.single(style: .available), false):
+                    return .available
+                    
                 //Not selected or background style of single, multiple, sequence mode
                 case (_, false), (.single(style: .background), true), (.multiple(style: .background), true), (.sequence(style: .background), true):
                     return .standard
                     
                 //Selected and circle style of single, multiple, sequence mode
-                case (.single(style: .circle), true), (.multiple(style: .circle), true), (.sequence(style: .circle), true):
+                case (.single(style: .circle), true), (.multiple(style: .circle), true), (.sequence(style: .circle), true), (.single(style: .available), true):
                     return .circle
                     
                 //Selected and sequence mode, semicircleEdge style
@@ -516,8 +533,11 @@ private extension Koyomi {
                 return textColor
             }
         }()
+        
         cell.contentPosition = postion
         cell.circularViewDiameter = circularViewDiameter
+        cell.availableViewDiameter = availableViewDiameter
+        
         let selectionColor: UIColor = {
             if isSelected {
                 return calendarDelegate?.koyomi?(self, selectionColorForItemAt: indexPath, date: date) ?? selectedStyleColor
