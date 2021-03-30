@@ -179,6 +179,7 @@ final public class Koyomi: UICollectionView {
             sectionSeparator.backgroundColor = style.colors.separator
         }
     }
+    public var selectionModeDefault: SelectionMode = .single(style: .circle)
     
     public var selectionMode: SelectionMode = .single(style: .circle) {
         didSet {
@@ -190,6 +191,7 @@ final public class Koyomi: UICollectionView {
                 case .none:        return .none
                 }
             }()
+            selectionModeDefault = selectionMode
         }
     }
     
@@ -442,14 +444,13 @@ private extension Koyomi {
             
         } else {
             
-            if availableDates.contains(date) {
-                selectionMode = .single(style: .available)
-            
-            }
-            
             // Configure appearance properties for day cell
             isSelected = model.isSelect(with: indexPath)
-            
+            if isAvailableDate(date: date) {
+                selectionMode = .single(style: .available)
+            } else {
+                selectionMode = selectionModeDefault
+            }
             textColor = {
                 var baseColor: UIColor {
                     if let beginning = model.indexAtBeginning(in: .current), indexPath.row < beginning {
@@ -488,30 +489,31 @@ private extension Koyomi {
                         return .middle
                     }
                 }
-                
-                switch (selectionMode, isSelected) {
+                let availableDate: Bool = isAvailableDate(date: date)
+                print("SelectionMode: \(selectionMode), \(isSelected), \(availableDate)")
+                switch (selectionMode, isSelected, availableDate) {
                 
                 //Not selected and available date to select.
-                case (.single(style: .available), false):
+                case (.single(style: .available), false, true):
                     return .available
                     
                 //Not selected or background style of single, multiple, sequence mode
-                case (_, false), (.single(style: .background), true), (.multiple(style: .background), true), (.sequence(style: .background), true):
+                case (_, false, _), (.single(style: .background), true, _), (.multiple(style: .background), true, _), (.sequence(style: .background), true, _):
                     return .standard
                     
                 //Selected and circle style of single, multiple, sequence mode
-                case (.single(style: .circle), true), (.multiple(style: .circle), true), (.sequence(style: .circle), true), (.single(style: .available), true):
+                case (.single(style: .circle), true, _), (.multiple(style: .circle), true, _), (.sequence(style: .circle), true, _), (.single(style: .available), true, _):
                     return .circle
                     
                 //Selected and sequence mode, semicircleEdge style
-                case (.sequence(style: .semicircleEdge), true):
+                case (.sequence(style: .semicircleEdge), true, _):
                     return .semicircleEdge(position: sequencePosition)
                     
-                case (.single(style: .line), true), (.multiple(style: .line), true):
+                case (.single(style: .line), true, _), (.multiple(style: .line), true, _):
                     // Position is always nil.
                     return .line(position: nil)
                     
-                case (.sequence(style: .line), true):
+                case (.sequence(style: .line), true, _):
                     return .line(position: sequencePosition)
                     
                 default: return .standard
@@ -554,6 +556,14 @@ private extension Koyomi {
         }
         
         cell.configureAppearanse(of: style, withColor: selectionColor, backgroundColor: backgroundColor, isSelected: isSelected)
+    }
+    
+    func isAvailableDate(date: Date) -> Bool {
+        if let date = KoyomiUtil.componentDate(from: date), availableDates.contains(date) {
+            return true
+        } else {
+            return false
+        }
     }
 }
 
@@ -616,6 +626,26 @@ extension Koyomi: UICollectionViewDataSource {
         }
         configure(cell, at: indexPath)
         return cell
+    }
+}
+
+class KoyomiUtil {
+    class func createDate(withMonth month: Int, day: Int, year: Int) -> Date {
+        let calendar = Calendar.current
+        let dateComponents = DateComponents(calendar: calendar,
+                                            year: year,
+                                            month: month,
+                                            day: day)
+
+        // DateComponents as a date specifier
+        return calendar.date(from: dateComponents)!
+    }
+    
+    class func componentDate(from aDate:Date) -> Date? {
+        let calender   = Calendar.current
+        let components = calender.dateComponents([.year, .month, .day], from: aDate)
+        return calender.date(from: components)
+        
     }
 }
 

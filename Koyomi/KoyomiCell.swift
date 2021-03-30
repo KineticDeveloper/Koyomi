@@ -93,6 +93,7 @@ final class KoyomiCell: UICollectionViewCell {
             self.backgroundColor = isSelected ? color : backgroundColor
             
             circularView.isHidden  = true
+            availableView.isHidden = true
             lineView.isHidden = true
             rightSemicircleView.isHidden = true
             leftSemicircleView.isHidden  = true
@@ -101,18 +102,15 @@ final class KoyomiCell: UICollectionViewCell {
         case .circle:
             circularView.backgroundColor = color
             self.backgroundColor = backgroundColor
-            
+            availableView.isHidden = true
             circularView.isHidden  = false
             lineView.isHidden = true
             rightSemicircleView.isHidden = true
             leftSemicircleView.isHidden  = true
             
         case .available:
-            availableView.backgroundColor = isSelected ? color : backgroundColor
-            availableView.isHidden = false
-            availableView.backgroundColor = UIColor.green
-            self.backgroundColor = UIColor.blue
             self.backgroundColor = isSelected ? color : backgroundColor
+            availableView.isHidden = false
             circularView.isHidden  = true
             lineView.isHidden = true
             rightSemicircleView.isHidden = true
@@ -121,7 +119,7 @@ final class KoyomiCell: UICollectionViewCell {
         case .semicircleEdge(let position):
             lineView.isHidden = true
             circularView.isHidden = true
-            
+            availableView.isHidden = true
             if case .left = position {
                 rightSemicircleView.isHidden = false
                 leftSemicircleView.isHidden  = false
@@ -158,6 +156,7 @@ final class KoyomiCell: UICollectionViewCell {
             rightSemicircleView.isHidden = true
             leftSemicircleView.isHidden  = true
             circularView.isHidden = true
+            availableView.isHidden = true
             lineView.isHidden = false
             lineView.backgroundColor = color
             
@@ -246,7 +245,7 @@ private extension KoyomiCell {
     }
     
     func configureAvailableView() {
-        let diameter = bounds.width * circularViewDiameter
+        let diameter = bounds.width * availableViewDiameter
         availableView.frame = CGRect(x: (bounds.width - diameter) / 2, y: (bounds.height - diameter) / 2, width: diameter, height: diameter)
         availableView.layer.backgroundColor = UIColor.clear.cgColor
         availableView.layer.borderWidth = 1.0
