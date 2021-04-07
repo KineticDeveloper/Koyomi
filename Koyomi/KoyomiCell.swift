@@ -57,6 +57,18 @@ final class KoyomiCell: UICollectionViewCell {
         }
     }
     
+    var availableViewColor: UIColor = .lightGray {
+        didSet {
+            configureAvailableView()
+        }
+    }
+    
+    var availableTextColor: UIColor = .black {
+        didSet {
+            configureAvailableView()
+        }
+    }
+    
     var availableViewDiameter: CGFloat = 0.75 {
         didSet {
             configureAvailableView()
@@ -248,8 +260,8 @@ private extension KoyomiCell {
         let diameter = bounds.width * availableViewDiameter
         availableView.frame = CGRect(x: (bounds.width - diameter) / 2, y: (bounds.height - diameter) / 2, width: diameter, height: diameter)
         availableView.layer.backgroundColor = UIColor.clear.cgColor
-        availableView.layer.borderWidth = 1.0
-        availableView.layer.borderColor = UIColor.green.cgColor
+        availableView.layer.borderWidth = 1.2
+        availableView.layer.borderColor = availableViewColor.cgColor
         availableView.layer.cornerRadius = diameter / 2
     }
     

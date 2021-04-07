@@ -278,6 +278,9 @@ final public class Koyomi: UICollectionView {
     public var holidayColor: (saturday: UIColor, sunday: UIColor) = (UIColor.KoyomiColor.blue, UIColor.KoyomiColor.red)
     
     @IBInspectable public var selectedStyleColor: UIColor = UIColor.KoyomiColor.red
+    @IBInspectable public var availableStyleColor: UIColor = UIColor.KoyomiColor.red
+    @IBInspectable public var availableStyleTextColor: UIColor = UIColor.KoyomiColor.black
+    
     
     public enum SelectedTextState { case change(UIColor), keeping }
     public var selectedDayTextState: SelectedTextState = .change(.white)
@@ -490,7 +493,7 @@ private extension Koyomi {
                     }
                 }
                 let availableDate: Bool = isAvailableDate(date: date)
-                print("SelectionMode: \(selectionMode), \(isSelected), \(availableDate)")
+                print("SelectionMode: \(selectionMode), \(isSelected), \(availableDate), \(date )")
                 switch (selectionMode, isSelected, availableDate) {
                 
                 //Not selected and available date to select.
@@ -531,6 +534,8 @@ private extension Koyomi {
         cell.textColor = {
             if isSelected {
                 return calendarDelegate?.koyomi?(self, selectionTextColorForItemAt: indexPath, date: date) ?? textColor
+            } else if isAvailableDate(date: date) {
+                return availableStyleTextColor
             } else {
                 return textColor
             }
@@ -539,6 +544,8 @@ private extension Koyomi {
         cell.contentPosition = postion
         cell.circularViewDiameter = circularViewDiameter
         cell.availableViewDiameter = availableViewDiameter
+        cell.availableViewColor = availableStyleColor
+        cell.availableTextColor = availableStyleTextColor
         
         let selectionColor: UIColor = {
             if isSelected {
