@@ -13,6 +13,7 @@ final class KoyomiCell: UICollectionViewCell {
     // Fileprivate properties
     fileprivate let contentLabel: UILabel = .init()
     fileprivate let circularView: UIView  = .init()
+    fileprivate let availableView: UIView  = .init()
     fileprivate let lineView: UIView      = .init()
     
     fileprivate let leftSemicircleView: UIView  = .init()
@@ -21,7 +22,7 @@ final class KoyomiCell: UICollectionViewCell {
     static let identifier = "KoyomiCell"
     
     enum CellStyle {
-        case standard, circle, semicircleEdge(position: SequencePosition), line(position: SequencePosition?)
+        case standard, circle, semicircleEdge(position: SequencePosition), line(position: SequencePosition?), available
         
         enum SequencePosition { case left, middle, right }
     }
@@ -56,6 +57,24 @@ final class KoyomiCell: UICollectionViewCell {
         }
     }
     
+    var availableViewColor: UIColor = .lightGray {
+        didSet {
+            configureAvailableView()
+        }
+    }
+    
+    var availableTextColor: UIColor = .black {
+        didSet {
+            configureAvailableView()
+        }
+    }
+    
+    var availableViewDiameter: CGFloat = 0.75 {
+        didSet {
+            configureAvailableView()
+        }
+    }
+    
     // MARK: - Initializer -
     
     override init(frame: CGRect) {
@@ -86,6 +105,7 @@ final class KoyomiCell: UICollectionViewCell {
             self.backgroundColor = isSelected ? color : backgroundColor
             
             circularView.isHidden  = true
+            availableView.isHidden = true
             lineView.isHidden = true
             rightSemicircleView.isHidden = true
             leftSemicircleView.isHidden  = true
@@ -94,17 +114,24 @@ final class KoyomiCell: UICollectionViewCell {
         case .circle:
             circularView.backgroundColor = color
             self.backgroundColor = backgroundColor
-            
+            availableView.isHidden = true
             circularView.isHidden  = false
             lineView.isHidden = true
             rightSemicircleView.isHidden = true
             leftSemicircleView.isHidden  = true
             
-        // isSelected is always true
+        case .available:
+            self.backgroundColor = isSelected ? color : backgroundColor
+            availableView.isHidden = false
+            circularView.isHidden  = true
+            lineView.isHidden = true
+            rightSemicircleView.isHidden = true
+            leftSemicircleView.isHidden  = true
+            
         case .semicircleEdge(let position):
             lineView.isHidden = true
             circularView.isHidden = true
-            
+            availableView.isHidden = true
             if case .left = position {
                 rightSemicircleView.isHidden = false
                 leftSemicircleView.isHidden  = false
@@ -141,6 +168,7 @@ final class KoyomiCell: UICollectionViewCell {
             rightSemicircleView.isHidden = true
             leftSemicircleView.isHidden  = true
             circularView.isHidden = true
+            availableView.isHidden = true
             lineView.isHidden = false
             lineView.backgroundColor = color
             
@@ -195,6 +223,9 @@ private extension KoyomiCell {
         circularView.isHidden = true
         addSubview(circularView)
         
+        availableView.isHidden = true
+        addSubview(availableView)
+        
         leftSemicircleView.frame = CGRect(x: 0, y: 0, width: bounds.width / 2, height: bounds.height)
         leftSemicircleView.isHidden = true
         addSubview(leftSemicircleView)
@@ -223,6 +254,15 @@ private extension KoyomiCell {
         let diameter = bounds.width * circularViewDiameter
         circularView.frame = CGRect(x: (bounds.width - diameter) / 2, y: (bounds.height - diameter) / 2, width: diameter, height: diameter)
         circularView.layer.cornerRadius = diameter / 2
+    }
+    
+    func configureAvailableView() {
+        let diameter = bounds.width * availableViewDiameter
+        availableView.frame = CGRect(x: (bounds.width - diameter) / 2, y: (bounds.height - diameter) / 2, width: diameter, height: diameter)
+        availableView.layer.backgroundColor = UIColor.clear.cgColor
+        availableView.layer.borderWidth = 1.2
+        availableView.layer.borderColor = availableViewColor.cgColor
+        availableView.layer.cornerRadius = diameter / 2
     }
     
     func configureLineView() {
